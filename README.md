@@ -17,20 +17,34 @@ chmod +x fetch-macOS.py
 ```
 在選單中選擇最新的iso，等待下載完成後，運行以下命令，將dmg包轉換成iso包
 ```
-apt-get install dmg2img -y && dmg2img BaseSystem.dmg Mojave-installer.iso
+# 安裝dmg2img 若你是deb包管理系以外的系統，可以自行查找如何安裝dmg2img
+apt-get install dmg2img -y 
+# 利用dmg2img將基本系統dmg鏡像轉為iso鏡像
+dmg2img BaseSystem.dmg Mojave-installer.iso
 ```
 然後下載Clover
 ```
+# Ubuntu & Debian
 apt-get install unzip -y
+# Centos & RHEL
+yum install unzip -y
+# 取得clover
 wget https://github.com/thenickdude/OSX-KVM/releases/download/clover-r4920/clover-r4920.iso.zip && unzip clover-r4920.iso.zip
 ```
 然後將clover-r4920.iso與Mojave-installer.iso上傳到PVE中
 
 ## 3 在網頁中創建虛擬機
 
-在OS頁面選擇Clover ISO進行引導，系統選擇其他（other），System頁面的顯示卡選擇VMware兼容，BIOS選擇OVMF，Machine選擇q35（或者在之後的步驟加入q35選項），硬盤選擇SATA，緩存設置成Write back（不安全）
-CPU的類型設置成Penryn，網卡設置成Vmware vmxnet3
-點開虛擬機的畫面，添加Mojave-installer.iso，選擇ide通道的cd-ram
+1. OS頁面選擇Clover ISO進行引導
+2. 系統選擇其他（other）
+3. System頁面的顯示卡選擇VMware兼容
+4. BIOS選擇OVMF
+5. Machine選擇q35
+6. 硬盤選擇SATA，緩存設置成Write back（不安全）
+7. CPU的類型設置成Penryn
+8. 網卡設置成Vmware vmxnet3
+
+點開虛擬機的硬件選項卡，添加Mojave-installer.iso，選擇ide通道的cd-ram
 
 先不要啟動虛擬機，在ssh中打開/etc/pve/qemu-server/你的VMID.conf
 ```
@@ -114,7 +128,10 @@ echo "blacklist nvidia" >> /etc/modprobe.d/blacklist.conf
 ```
 update-initramfs -u
 ```
-執行lspci，找出顯卡的代號（例如01：00），然後執行lspci -n -s 01:00
+執行lspci，找出顯卡的代號（例如01：00），然後執行
+```
+lspci -n -s 01:00
+```
 得到類似以下的輸出
 ```
 01:00.0 0300: 10de:1d01 (rev a1)
@@ -170,7 +187,7 @@ diskutil list
 sudo dd if=<Clover CD的EFI分區> of=<硬盤的EFI分區> 
 ```
 將Clover安裝到硬盤中
-（你也可以忽略這一步，將Clover CD永久掛載在虛擬機下）
+> 你也可以忽略這一步，將Clover CD永久掛載在虛擬機下
 關機，移除CLover CD，從硬盤啟動。
 
 
