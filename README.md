@@ -188,6 +188,7 @@ sudo dd if=<Clover CD的EFI分區> of=<硬盤的EFI分區>
 ```
 將Clover安裝到硬盤中
 > 你也可以忽略這一步，將Clover CD永久掛載在虛擬機下
+
 關機，移除CLover CD，從硬盤啟動。
 
 
