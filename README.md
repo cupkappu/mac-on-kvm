@@ -6,10 +6,11 @@
 > *包括AMD與INTEL*
 
 ## 1 安裝PVE
+[安裝教程](http://www.kappu.ml/index.php/archives/3/)
 此處安裝方法與一般的方法相同，推薦將pve系統安裝到usb設備
 
 ## 2 創建macos安裝鏡像
-在linux系統下運行以下命令
+在linux或macos系統下運行以下命令
 ```bash
 wget  https://raw.githubusercontent.com/thenickdude/OSX-KVM/master/fetch-macOS.py 
 chmod +x fetch-macOS.py
@@ -21,6 +22,10 @@ chmod +x fetch-macOS.py
 apt-get install dmg2img -y 
 # 利用dmg2img將基本系統dmg鏡像轉為iso鏡像
 dmg2img BaseSystem.dmg Mojave-installer.iso
+
+# 若你是macOS，請使用以下命令
+hdiutil convert BaseSystem.dmg -format RdWr -o Mojave-installer.iso
+mv Mojave-installer.iso.img Mojave-installer.iso
 ```
 然後下載Clover
 ```
@@ -105,32 +110,13 @@ apt-mark hold pve-edk2-firmware
 ```
 
 ## 4 設置直通
-首先，編輯grub
-```
-vim /etc/default/grub
-```
-將
-```
-GRUB_CMDLINE_LINUX_DEFAULT="quiet"
-```
-改為
-```
-GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on video=efifb:off"
-```
-***（若是amd則改為amd_iommu=on）***
+首先，編輯grub`vim /etc/default/grub`
+將`GRUB_CMDLINE_LINUX_DEFAULT="quiet"`改為`GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on video=efifb:off"`
+**（若是amd則改為amd_iommu=on）**
 
-執行以下命令更新grub信息
-```
-update-grub
-```
-最後輸入以下命令檢查是否有錯
-```
-dmesg | grep -e DMAR -e IOMMU
-```
-然後編輯/etc/modules
-```
-nano /etc/modules
-```
+執行`update-grub`命令更新grub信息
+最後輸入`dmesg | grep -e DMAR -e IOMMU`命令檢查是否有錯
+然後編輯/etc/modules `nano /etc/modules`
 在最尾加入以下四行
 ```
 vfio
@@ -138,48 +124,36 @@ vfio_iommu_type1
 vfio_pci
 vfio_virqfd
 ```
-再次輸入以下命令檢查設備是否支持iommu
-```
-dmesg | grep ecap
-```
+再次輸入`dmesg | grep ecap`命令檢查設備是否支持iommu
 然後執行以下命令將驅動加入黑名單
 ```
 echo "blacklist radeon" >> /etc/modprobe.d/blacklist.conf
 echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
 echo "blacklist nvidia" >> /etc/modprobe.d/blacklist.conf
 ```
-執行以下命令更新信息
-```
-update-initramfs -u
-```
-執行lspci，找出顯卡的代號（例如01：00），然後執行
-```
-lspci -n -s 01:00
-```
+執行`update-initramfs -u`命令更新信息
+執行`lspci`，找出顯卡的代號（例如01：00），然後執行`lspci -n -s 01:00`
 得到類似以下的輸出
 ```
 01:00.0 0300: 10de:1d01 (rev a1)
 01:00.1 0403: 10de:0fb8 (rev a1)
 ```
-其中10de:1d01與10de:0fb8是vendor IDs
+其中`10de:1d01`與`10de:0fb8`是vendor IDs
 將vendor IDs指定到VFIO模塊
 ```
 echo "options vfio-pci ids=10de:1d01,10de:0fb8" > /etc/modprobe.d/vfio.conf
 ```
 進入web管理介面
 + 在vm的硬件選項卡中編輯添加PCI設備
-+ 選定顯卡對應的01:00.0與01:00.1
-+ 在01:00.0（顯示設備）中勾選
++ 選定顯卡對應的`01:00.0`與`01:00.1`
++ 在`01:00.0`（顯示設備）中勾選
 	+ PCI-Express
 	+ All Functions
 	+ 主GPU
-+ 檢查文件/etc/pve/qemu-server/YOUR-VM-ID.conf
++ 檢查文件`/etc/pve/qemu-server/YOUR-VM-ID.conf`
 	+ 確保01:00後的參數正確
 
-**e.g.**
-```
-hostpci0: 01:00,x-vga=1,pcie=1
-```
+**e.g.**`hostpci0: 01:00,x-vga=1,pcie=1`
 
 然後，直通鼠標鍵盤到VM中，添加USB設備，選擇鼠標鍵盤，然後添加到VM
 
@@ -201,15 +175,9 @@ hostpci0: 01:00,x-vga=1,pcie=1
 2. 選定Clover啟動項
 
 然後才會看到磁盤內的Mac系統。
-進入Mac系統後，打開終端，輸入
-```
-diskutil list
-```
+進入Mac系統後，打開終端，輸入`diskutil list`
 以檢查設備
-然後輸入
-```
-sudo dd if=<Clover CD的EFI分區> of=<硬盤的EFI分區> 
-```
+然後輸入`sudo dd if=<Clover CD的EFI分區> of=<硬盤的EFI分區> `
 將Clover安裝到硬盤中
 > 你也可以忽略這一步，將Clover CD永久掛載在虛擬機下
 
