@@ -97,6 +97,11 @@ git clone -b macos-support-proxmox-6.0 https://github.com/thenickdude/pve-edk2-f
 # Build it
 cd pve-edk2-firmware
 make
+
+dpkg -i pve-edk2-firmware_*.deb
+
+# Prevent it from being replaced later by apt upgrade:
+apt-mark hold pve-edk2-firmware
 ```
 
 ## 4 設置直通
