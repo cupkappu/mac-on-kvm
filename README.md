@@ -33,7 +33,9 @@ CPU的類型設置成Penryn，網卡設置成Vmware vmxnet3
 點開虛擬機的畫面，添加Mojave-installer.iso，選擇ide通道的cd-ram
 
 先不要啟動虛擬機，在ssh中打開/etc/pve/qemu-server/你的VMID.conf
+```
 nano /etc/pve/qemu-server/你的VMID.conf
+```
 然後輸入以下代碼
 ```
 args: -device isa-applesmc,osk="ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc" -smbios type=2 -cpu Penryn,kvm=on,vendor=GenuineIntel,+invtsc,vmware-cpuid-freq=on,+pcid,+ssse3,+sse4.2,+popcnt,+avx,+aes,+xsave,+xsaveopt,check -device usb-kbd,bus=ehci.0,port=2
