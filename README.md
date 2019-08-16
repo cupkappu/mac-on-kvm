@@ -79,6 +79,25 @@ sockets: 1
 vga: vmware
 ```
 設置完畢後，根據[patch-ovmf-to-support-macos-in-proxmox-5-1 ](https://www.nicksherlock.com/2018/04/patch-ovmf-to-support-macos-in-proxmox-5-1/)來安裝OVMF庫
+> For PVE 6
+```
+# Add missing locale
+echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+export LC_ALL=en_US.UTF-8
+
+# Add tools and build dependencies:
+apt update
+apt install build-essential git lintian debhelper iasl nasm \
+  python uuid-dev gcc-aarch64-linux-gnu bc python3-distutils -y
+
+# Clone my patched source
+git clone -b macos-support-proxmox-6.0 https://github.com/thenickdude/pve-edk2-firmware.git
+
+# Build it
+cd pve-edk2-firmware
+make
+```
 
 ## 4 設置直通
 首先，編輯grub
